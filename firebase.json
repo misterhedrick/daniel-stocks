@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "dist/browser/daniel-stocks",
+    "public": "dist/daniel-stocks/browser",
     "ignore": [
       "firebase.json",
       "**/.*",
