@@ -19,46 +19,140 @@
   flex: 1;
 }
 
+/* Use tabular numerals instead of monospace.
+   Crisp text + aligned digits. */
+.mono {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* ---------- Summary cards ---------- */
 .cards {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px;
-  margin: 16px 0;
+  margin: 16px 0 18px;
 }
 
-.controls {
-  margin-bottom: 12px;
-}
+.cards mat-card {
+  background-color: var(--mat-sys-surface-container, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--mat-sys-outline-variant, rgba(255, 255, 255, 0.12));
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+  border-radius: 14px;
 
-.controls-row {
+  padding: 14px 16px;
   display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  min-height: 74px;
+
+  text-align: center;
   align-items: center;
+}
+
+.cards mat-card-subtitle {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.85;
+  letter-spacing: 0.3px;
+  text-align: center;
+}
+
+.cards mat-card-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.05;
+  text-align: center;
+}
+
+/* ---------- Results grid ---------- */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+.result-card {
+  padding: 16px;
+  border-radius: 16px;
+
+  background-color: var(--mat-sys-surface-container-high, rgba(255, 255, 255, 0.08));
+  border: 1px solid var(--mat-sys-outline-variant, rgba(255, 255, 255, 0.14));
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.40);
+
+  transition: box-shadow 120ms ease, border-color 120ms ease;
+}
+
+.result-card:hover {
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.55);
+  border-color: var(--mat-sys-outline, rgba(255, 255, 255, 0.22));
+}
+
+.result-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
   gap: 12px;
 }
 
-.search {
-  flex: 1;
+.ticker {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
 }
 
-.count {
-  margin-left: auto;
-  color: rgba(0, 0, 0, 0.6);
-}
-
-.table-card {
-  padding: 8px;
-}
-
-.table-wrap {
-  overflow: auto;
-}
-
-.num {
+.quality {
   text-align: right;
 }
 
-.mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+.quality-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  opacity: 0.85;
+}
+
+.quality-value {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.result-meta {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.exp {
+  font-size: 15px;
+  font-weight: 700;
+  opacity: 0.95;
+  letter-spacing: 0.2px;
+}
+
+.result-grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.kv .k {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.78;
+}
+
+.kv .v {
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .muted {
@@ -66,11 +160,60 @@
   font-size: 12px;
 }
 
+/* ---------- States ---------- */
 .error-card {
+  margin-top: 16px;
+  border-radius: 14px;
+
+  background-color: var(--mat-sys-surface-container, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--mat-sys-outline-variant, rgba(255, 255, 255, 0.12));
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.40);
+
   border-left: 6px solid #d32f2f;
-  margin-top: 12px;
 }
 
+/* Empty state: make it look intentional and center it across the page */
 .empty {
-  margin-top: 16px;
+  margin: 32px auto 0;
+  max-width: 640px;
+  width: min(640px, 100%);
+  padding: 22px 22px;
+  border-radius: 18px;
+
+  background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.10),
+      rgba(255, 255, 255, 0.06)
+    );
+  border: 1px solid var(--mat-sys-outline-variant, rgba(255, 255, 255, 0.14));
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55);
+
+  text-align: center;
+}
+
+.empty mat-card-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.empty mat-card-content {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+  opacity: 0.9;
+}
+
+/* Key part: when .empty is inside the grid, span full width and center */
+.results-grid > .empty {
+  grid-column: 1 / -1;
+  justify-self: center;
+}
+
+/* ---------- Responsive polish ---------- */
+@media (max-width: 1200px) {
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }

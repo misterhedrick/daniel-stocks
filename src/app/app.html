@@ -27,18 +27,8 @@
   @if (data(); as d) {
     <div class="cards">
       <mat-card>
-        <mat-card-subtitle>Scanned</mat-card-subtitle>
-        <mat-card-title>{{ d.scanned | number }}</mat-card-title>
-      </mat-card>
-
-      <mat-card>
         <mat-card-subtitle>Qualified tickers</mat-card-subtitle>
         <mat-card-title>{{ d.qualified_tickers | number }}</mat-card-title>
-      </mat-card>
-
-      <mat-card>
-        <mat-card-subtitle>Failed tickers</mat-card-subtitle>
-        <mat-card-title>{{ d.failed_tickers | number }}</mat-card-title>
       </mat-card>
 
       <mat-card>
@@ -47,157 +37,67 @@
       </mat-card>
 
       <mat-card>
-        <mat-card-subtitle>Max cost/contract</mat-card-subtitle>
+        <mat-card-subtitle>Max Cost</mat-card-subtitle>
         <mat-card-title>{{ d.max_cost_per_contract | currency:'USD':'symbol':'1.2-2' }}</mat-card-title>
       </mat-card>
     </div>
 
-    <mat-card class="controls">
-      <div class="controls-row">
-        <mat-form-field appearance="outline" class="search">
-          <mat-label>Search</mat-label>
-          <input
-            matInput
-            placeholder="Ticker or option symbol"
-            [value]="query()"
-            (input)="setQuery(($any($event.target)).value)"
-          />
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
+    <div class="results-grid">
+      @for (r of sortedResults(); track r.option_symbol) {
+        <mat-card class="result-card mat-elevation-z1">
+          <div class="result-header">
+            <div class="ticker">{{ r.ticker }}</div>
 
-        <mat-button-toggle-group
-          [value]="typeFilter()"
-          (change)="setTypeFilter($event.value)"
-          aria-label="Type Filter"
-        >
-          <mat-button-toggle value="all">All</mat-button-toggle>
-          <mat-button-toggle value="call">Calls</mat-button-toggle>
-          <mat-button-toggle value="put">Puts</mat-button-toggle>
-        </mat-button-toggle-group>
+            <div class="quality">
+              <div class="quality-label">Quality</div>
+              <div class="quality-value mono">{{ r.quality | number:'1.0-2' }}</div>
+            </div>
+          </div>
 
-        <div class="count">
-          Showing <b>{{ filtered().length | number }}</b>
-        </div>
-      </div>
-    </mat-card>
+          <div class="result-meta">
+            <mat-chip-set>
+              <mat-chip [color]="chipColor(r.type)" selected>{{ r.type | uppercase }}</mat-chip>
+            </mat-chip-set>
 
-    <mat-card class="table-card">
-      <div class="table-wrap">
-        <table mat-table [dataSource]="filtered()" class="mat-elevation-z1">
+            <div class="exp mono">{{ r.expiration }}</div>
+          </div>
 
-          <!-- Ticker -->
-          <ng-container matColumnDef="ticker">
-            <th mat-header-cell *matHeaderCellDef>Ticker</th>
-            <td mat-cell *matCellDef="let r">
-              <div class="mono">{{ r.ticker }}</div>
-              <div class="muted mono">{{ r.option_symbol }}</div>
-            </td>
-          </ng-container>
+          <div class="result-grid">
+            <div class="kv">
+              <div class="k muted">Strike</div>
+              <div class="v mono">{{ r.strike | number:'1.0-2' }}</div>
+            </div>
 
-          <!-- Type -->
-          <ng-container matColumnDef="type">
-            <th mat-header-cell *matHeaderCellDef>Type</th>
-            <td mat-cell *matCellDef="let r">
-              <mat-chip-set>
-                <mat-chip [color]="chipColor(r.type)" selected>{{ r.type | uppercase }}</mat-chip>
-              </mat-chip-set>
-            </td>
-          </ng-container>
+            <div class="kv">
+              <div class="k muted">Bid</div>
+              <div class="v mono">{{ r.bid | number:'1.2-2' }}</div>
+            </div>
 
-          <!-- Expiration -->
-          <ng-container matColumnDef="expiration">
-            <th mat-header-cell *matHeaderCellDef>Exp</th>
-            <td mat-cell *matCellDef="let r" class="mono">{{ r.expiration }}</td>
-          </ng-container>
+            <div class="kv">
+              <div class="k muted">Ask</div>
+              <div class="v mono">{{ r.ask | number:'1.2-2' }}</div>
+            </div>
 
-          <!-- Strike -->
-          <ng-container matColumnDef="strike">
-            <th mat-header-cell *matHeaderCellDef class="num">Strike</th>
-            <td mat-cell *matCellDef="let r" class="num">{{ r.strike | number:'1.0-2' }}</td>
-          </ng-container>
-
-          <!-- Bid -->
-          <ng-container matColumnDef="bid">
-            <th mat-header-cell *matHeaderCellDef class="num">Bid</th>
-            <td mat-cell *matCellDef="let r" class="num">{{ r.bid | currency:'USD':'symbol':'1.2-2' }}</td>
-          </ng-container>
-
-          <!-- Ask -->
-          <ng-container matColumnDef="ask">
-            <th mat-header-cell *matHeaderCellDef class="num">Ask</th>
-            <td mat-cell *matCellDef="let r" class="num">{{ r.ask | currency:'USD':'symbol':'1.2-2' }}</td>
-          </ng-container>
-
-          <!-- Mid -->
-          <ng-container matColumnDef="mid">
-            <th mat-header-cell *matHeaderCellDef class="num">Mid</th>
-            <td mat-cell *matCellDef="let r" class="num">{{ r.mid | currency:'USD':'symbol':'1.2-2' }}</td>
-          </ng-container>
-
-          <!-- Spread -->
-          <ng-container matColumnDef="spread">
-            <th mat-header-cell *matHeaderCellDef class="num">Spread</th>
-            <td mat-cell *matCellDef="let r" class="num">{{ r.spread_pct | percent:'1.2-2' }}</td>
-          </ng-container>
-
-          <!-- Volume -->
-          <ng-container matColumnDef="volume">
-            <th mat-header-cell *matHeaderCellDef class="num">Vol</th>
-            <td mat-cell *matCellDef="let r" class="num">{{ r.volume | number }}</td>
-          </ng-container>
-
-          <!-- Open Interest -->
-          <ng-container matColumnDef="openInterest">
-            <th mat-header-cell *matHeaderCellDef class="num">OI</th>
-            <td mat-cell *matCellDef="let r" class="num">{{ r.open_interest | number }}</td>
-          </ng-container>
-
-          <!-- Delta -->
-          <ng-container matColumnDef="delta">
-            <th mat-header-cell *matHeaderCellDef class="num">Δ</th>
-            <td mat-cell *matCellDef="let r" class="num">{{ r.delta | number:'1.3-3' }}</td>
-          </ng-container>
-
-          <!-- IV -->
-          <ng-container matColumnDef="iv">
-            <th mat-header-cell *matHeaderCellDef class="num">IV</th>
-            <td mat-cell *matCellDef="let r" class="num">
-              {{ r.iv === null ? '—' : (r.iv | number:'1.3-3') }}
-            </td>
-          </ng-container>
-
-          <!-- Quality -->
-          <ng-container matColumnDef="quality">
-            <th mat-header-cell *matHeaderCellDef class="num">Quality</th>
-            <td mat-cell *matCellDef="let r" class="num">
-              <b>{{ r.quality | number:'1.2-2' }}</b>
-            </td>
-          </ng-container>
-
-          <!-- Limit -->
-          <ng-container matColumnDef="limit">
-            <th mat-header-cell *matHeaderCellDef class="num">Limit</th>
-            <td mat-cell *matCellDef="let r" class="num">{{ r.limit_price | currency:'USD':'symbol':'1.2-2' }}</td>
-          </ng-container>
-
-          <!-- Est Total -->
-          <ng-container matColumnDef="estTotal">
-            <th mat-header-cell *matHeaderCellDef class="num">Est total</th>
-            <td mat-cell *matCellDef="let r" class="num">
-              {{ r.estimated_total_cost | currency:'USD':'symbol':'1.2-2' }}
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table>
-      </div>
-    </mat-card>
+            <div class="kv">
+              <div class="k muted">Mid</div>
+              <div class="v mono">{{ r.mid | number:'1.2-2' }}</div>
+            </div>
+          </div>
+        </mat-card>
+      } @empty {
+        <mat-card class="empty">
+          <mat-card-title>No results</mat-card-title>
+          <mat-card-content>
+            The scan returned nothing qualified. Markets doing market things.
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
   } @else {
     <mat-card class="empty">
-      <mat-card-title>No data loaded</mat-card-title>
+      <mat-card-title>Loading…</mat-card-title>
       <mat-card-content>
-        Click <b>Refresh</b> to hit the API and populate the table.
+        Scanning on page load.
       </mat-card-content>
     </mat-card>
   }
